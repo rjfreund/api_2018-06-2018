@@ -1,0 +1,532 @@
+--
+-- PostgreSQL database dump
+--
+
+-- Dumped from database version 9.6beta1
+-- Dumped by pg_dump version 9.6beta1
+
+-- Started on 2016-06-29 15:20:51
+
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SET check_function_bodies = false;
+SET client_min_messages = warning;
+SET row_security = off;
+
+--
+-- TOC entry 6 (class 2615 OID 32879)
+-- Name: task-tracker; Type: SCHEMA; Schema: -; Owner: postgres
+--
+
+CREATE SCHEMA "task-tracker";
+
+
+ALTER SCHEMA "task-tracker" OWNER TO postgres;
+
+SET search_path = "task-tracker", pg_catalog;
+
+--
+-- TOC entry 197 (class 1255 OID 32978)
+-- Name: update_modified_column(); Type: FUNCTION; Schema: task-tracker; Owner: postgres
+--
+
+CREATE FUNCTION update_modified_column() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+    NEW."modified-date" = (now() at time zone 'utc');
+    RETURN NEW;	
+END;
+$$;
+
+
+ALTER FUNCTION "task-tracker".update_modified_column() OWNER TO postgres;
+
+SET default_tablespace = '';
+
+SET default_with_oids = false;
+
+--
+-- TOC entry 187 (class 1259 OID 32882)
+-- Name: categories; Type: TABLE; Schema: task-tracker; Owner: postgres
+--
+
+CREATE TABLE categories (
+    id integer NOT NULL,
+    name text NOT NULL,
+    "creation-date" timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
+    "modified-date" timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+
+ALTER TABLE categories OWNER TO postgres;
+
+--
+-- TOC entry 186 (class 1259 OID 32880)
+-- Name: categories_id_seq; Type: SEQUENCE; Schema: task-tracker; Owner: postgres
+--
+
+CREATE SEQUENCE categories_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE categories_id_seq OWNER TO postgres;
+
+--
+-- TOC entry 2193 (class 0 OID 0)
+-- Dependencies: 186
+-- Name: categories_id_seq; Type: SEQUENCE OWNED BY; Schema: task-tracker; Owner: postgres
+--
+
+ALTER SEQUENCE categories_id_seq OWNED BY categories.id;
+
+
+--
+-- TOC entry 194 (class 1259 OID 32985)
+-- Name: prerequisite-tasks; Type: TABLE; Schema: task-tracker; Owner: adminz9bkxe1
+--
+
+CREATE TABLE "prerequisite-tasks" (
+    "task-id" integer NOT NULL,
+    "prerequisite-task-id" integer NOT NULL
+);
+
+
+ALTER TABLE "prerequisite-tasks" OWNER TO adminz9bkxe1;
+
+--
+-- TOC entry 193 (class 1259 OID 32983)
+-- Name: prerequisite-tasks_prerequisite-task-id_seq; Type: SEQUENCE; Schema: task-tracker; Owner: adminz9bkxe1
+--
+
+CREATE SEQUENCE "prerequisite-tasks_prerequisite-task-id_seq"
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE "prerequisite-tasks_prerequisite-task-id_seq" OWNER TO adminz9bkxe1;
+
+--
+-- TOC entry 2194 (class 0 OID 0)
+-- Dependencies: 193
+-- Name: prerequisite-tasks_prerequisite-task-id_seq; Type: SEQUENCE OWNED BY; Schema: task-tracker; Owner: adminz9bkxe1
+--
+
+ALTER SEQUENCE "prerequisite-tasks_prerequisite-task-id_seq" OWNED BY "prerequisite-tasks"."prerequisite-task-id";
+
+
+--
+-- TOC entry 192 (class 1259 OID 32981)
+-- Name: prerequisite-tasks_task-id_seq; Type: SEQUENCE; Schema: task-tracker; Owner: adminz9bkxe1
+--
+
+CREATE SEQUENCE "prerequisite-tasks_task-id_seq"
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE "prerequisite-tasks_task-id_seq" OWNER TO adminz9bkxe1;
+
+--
+-- TOC entry 2195 (class 0 OID 0)
+-- Dependencies: 192
+-- Name: prerequisite-tasks_task-id_seq; Type: SEQUENCE OWNED BY; Schema: task-tracker; Owner: adminz9bkxe1
+--
+
+ALTER SEQUENCE "prerequisite-tasks_task-id_seq" OWNED BY "prerequisite-tasks"."task-id";
+
+
+--
+-- TOC entry 191 (class 1259 OID 32914)
+-- Name: reminders; Type: TABLE; Schema: task-tracker; Owner: postgres
+--
+
+CREATE TABLE reminders (
+    id integer NOT NULL,
+    name text NOT NULL,
+    datetime time with time zone,
+    "task-id" integer NOT NULL,
+    "creation-date" timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
+    "modified-date" timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+
+ALTER TABLE reminders OWNER TO postgres;
+
+--
+-- TOC entry 190 (class 1259 OID 32912)
+-- Name: reminders_id_seq; Type: SEQUENCE; Schema: task-tracker; Owner: postgres
+--
+
+CREATE SEQUENCE reminders_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE reminders_id_seq OWNER TO postgres;
+
+--
+-- TOC entry 2196 (class 0 OID 0)
+-- Dependencies: 190
+-- Name: reminders_id_seq; Type: SEQUENCE OWNED BY; Schema: task-tracker; Owner: postgres
+--
+
+ALTER SEQUENCE reminders_id_seq OWNED BY reminders.id;
+
+
+--
+-- TOC entry 189 (class 1259 OID 32893)
+-- Name: tasks; Type: TABLE; Schema: task-tracker; Owner: postgres
+--
+
+CREATE TABLE tasks (
+    id integer NOT NULL,
+    name text NOT NULL,
+    details text,
+    "parent-task-id" integer,
+    "category-id" integer NOT NULL,
+    "start-date" time with time zone,
+    "end-date" time with time zone,
+    "is-complete" boolean NOT NULL,
+    "creation-date" timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
+    "modified-date" timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
+    "user-id" integer NOT NULL
+);
+
+
+ALTER TABLE tasks OWNER TO postgres;
+
+--
+-- TOC entry 188 (class 1259 OID 32891)
+-- Name: tasks_id_seq; Type: SEQUENCE; Schema: task-tracker; Owner: postgres
+--
+
+CREATE SEQUENCE tasks_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE tasks_id_seq OWNER TO postgres;
+
+--
+-- TOC entry 2197 (class 0 OID 0)
+-- Dependencies: 188
+-- Name: tasks_id_seq; Type: SEQUENCE OWNED BY; Schema: task-tracker; Owner: postgres
+--
+
+ALTER SEQUENCE tasks_id_seq OWNED BY tasks.id;
+
+
+--
+-- TOC entry 196 (class 1259 OID 32994)
+-- Name: users; Type: TABLE; Schema: task-tracker; Owner: adminz9bkxe1
+--
+
+CREATE TABLE users (
+    id integer NOT NULL,
+    username text NOT NULL,
+    email text NOT NULL,
+    password text,
+    salt text
+);
+
+
+ALTER TABLE users OWNER TO adminz9bkxe1;
+
+--
+-- TOC entry 195 (class 1259 OID 32992)
+-- Name: users_id_seq; Type: SEQUENCE; Schema: task-tracker; Owner: adminz9bkxe1
+--
+
+CREATE SEQUENCE users_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE users_id_seq OWNER TO adminz9bkxe1;
+
+--
+-- TOC entry 2198 (class 0 OID 0)
+-- Dependencies: 195
+-- Name: users_id_seq; Type: SEQUENCE OWNED BY; Schema: task-tracker; Owner: adminz9bkxe1
+--
+
+ALTER SEQUENCE users_id_seq OWNED BY users.id;
+
+
+--
+-- TOC entry 2033 (class 2604 OID 32885)
+-- Name: categories id; Type: DEFAULT; Schema: task-tracker; Owner: postgres
+--
+
+ALTER TABLE ONLY categories ALTER COLUMN id SET DEFAULT nextval('categories_id_seq'::regclass);
+
+
+--
+-- TOC entry 2042 (class 2604 OID 32988)
+-- Name: prerequisite-tasks task-id; Type: DEFAULT; Schema: task-tracker; Owner: adminz9bkxe1
+--
+
+ALTER TABLE ONLY "prerequisite-tasks" ALTER COLUMN "task-id" SET DEFAULT nextval('"prerequisite-tasks_task-id_seq"'::regclass);
+
+
+--
+-- TOC entry 2043 (class 2604 OID 32989)
+-- Name: prerequisite-tasks prerequisite-task-id; Type: DEFAULT; Schema: task-tracker; Owner: adminz9bkxe1
+--
+
+ALTER TABLE ONLY "prerequisite-tasks" ALTER COLUMN "prerequisite-task-id" SET DEFAULT nextval('"prerequisite-tasks_prerequisite-task-id_seq"'::regclass);
+
+
+--
+-- TOC entry 2039 (class 2604 OID 32917)
+-- Name: reminders id; Type: DEFAULT; Schema: task-tracker; Owner: postgres
+--
+
+ALTER TABLE ONLY reminders ALTER COLUMN id SET DEFAULT nextval('reminders_id_seq'::regclass);
+
+
+--
+-- TOC entry 2036 (class 2604 OID 32896)
+-- Name: tasks id; Type: DEFAULT; Schema: task-tracker; Owner: postgres
+--
+
+ALTER TABLE ONLY tasks ALTER COLUMN id SET DEFAULT nextval('tasks_id_seq'::regclass);
+
+
+--
+-- TOC entry 2044 (class 2604 OID 32997)
+-- Name: users id; Type: DEFAULT; Schema: task-tracker; Owner: adminz9bkxe1
+--
+
+ALTER TABLE ONLY users ALTER COLUMN id SET DEFAULT nextval('users_id_seq'::regclass);
+
+
+--
+-- TOC entry 2179 (class 0 OID 32882)
+-- Dependencies: 187
+-- Data for Name: categories; Type: TABLE DATA; Schema: task-tracker; Owner: postgres
+--
+
+COPY categories (id, name, "creation-date", "modified-date") FROM stdin;
+\.
+
+
+--
+-- TOC entry 2199 (class 0 OID 0)
+-- Dependencies: 186
+-- Name: categories_id_seq; Type: SEQUENCE SET; Schema: task-tracker; Owner: postgres
+--
+
+SELECT pg_catalog.setval('categories_id_seq', 3, true);
+
+
+--
+-- TOC entry 2186 (class 0 OID 32985)
+-- Dependencies: 194
+-- Data for Name: prerequisite-tasks; Type: TABLE DATA; Schema: task-tracker; Owner: adminz9bkxe1
+--
+
+COPY "prerequisite-tasks" ("task-id", "prerequisite-task-id") FROM stdin;
+\.
+
+
+--
+-- TOC entry 2200 (class 0 OID 0)
+-- Dependencies: 193
+-- Name: prerequisite-tasks_prerequisite-task-id_seq; Type: SEQUENCE SET; Schema: task-tracker; Owner: adminz9bkxe1
+--
+
+SELECT pg_catalog.setval('"prerequisite-tasks_prerequisite-task-id_seq"', 1, false);
+
+
+--
+-- TOC entry 2201 (class 0 OID 0)
+-- Dependencies: 192
+-- Name: prerequisite-tasks_task-id_seq; Type: SEQUENCE SET; Schema: task-tracker; Owner: adminz9bkxe1
+--
+
+SELECT pg_catalog.setval('"prerequisite-tasks_task-id_seq"', 1, false);
+
+
+--
+-- TOC entry 2183 (class 0 OID 32914)
+-- Dependencies: 191
+-- Data for Name: reminders; Type: TABLE DATA; Schema: task-tracker; Owner: postgres
+--
+
+COPY reminders (id, name, datetime, "task-id", "creation-date", "modified-date") FROM stdin;
+\.
+
+
+--
+-- TOC entry 2202 (class 0 OID 0)
+-- Dependencies: 190
+-- Name: reminders_id_seq; Type: SEQUENCE SET; Schema: task-tracker; Owner: postgres
+--
+
+SELECT pg_catalog.setval('reminders_id_seq', 1, false);
+
+
+--
+-- TOC entry 2181 (class 0 OID 32893)
+-- Dependencies: 189
+-- Data for Name: tasks; Type: TABLE DATA; Schema: task-tracker; Owner: postgres
+--
+
+COPY tasks (id, name, "parent-task-id", "category-id", "start-date", "end-date", "is-complete", "creation-date", "modified-date", "user-id", details) FROM stdin;
+\.
+
+
+--
+-- TOC entry 2203 (class 0 OID 0)
+-- Dependencies: 188
+-- Name: tasks_id_seq; Type: SEQUENCE SET; Schema: task-tracker; Owner: postgres
+--
+
+SELECT pg_catalog.setval('tasks_id_seq', 1, false);
+
+
+--
+-- TOC entry 2188 (class 0 OID 32994)
+-- Dependencies: 196
+-- Data for Name: users; Type: TABLE DATA; Schema: task-tracker; Owner: adminz9bkxe1
+--
+
+COPY users (id, username, email, password, salt) FROM stdin;
+\.
+
+
+--
+-- TOC entry 2204 (class 0 OID 0)
+-- Dependencies: 195
+-- Name: users_id_seq; Type: SEQUENCE SET; Schema: task-tracker; Owner: adminz9bkxe1
+--
+
+SELECT pg_catalog.setval('users_id_seq', 1, false);
+
+
+--
+-- TOC entry 2046 (class 2606 OID 32890)
+-- Name: categories categories_pkey; Type: CONSTRAINT; Schema: task-tracker; Owner: postgres
+--
+
+ALTER TABLE ONLY categories
+    ADD CONSTRAINT categories_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 2052 (class 2606 OID 32991)
+-- Name: prerequisite-tasks prerequisite-tasks_pkey; Type: CONSTRAINT; Schema: task-tracker; Owner: adminz9bkxe1
+--
+
+ALTER TABLE ONLY "prerequisite-tasks"
+    ADD CONSTRAINT "prerequisite-tasks_pkey" PRIMARY KEY ("task-id", "prerequisite-task-id");
+
+
+--
+-- TOC entry 2050 (class 2606 OID 32919)
+-- Name: reminders reminders_pkey; Type: CONSTRAINT; Schema: task-tracker; Owner: postgres
+--
+
+ALTER TABLE ONLY reminders
+    ADD CONSTRAINT reminders_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 2048 (class 2606 OID 32901)
+-- Name: tasks tasks_pkey; Type: CONSTRAINT; Schema: task-tracker; Owner: postgres
+--
+
+ALTER TABLE ONLY tasks
+    ADD CONSTRAINT tasks_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 2054 (class 2606 OID 33002)
+-- Name: users users_pkey; Type: CONSTRAINT; Schema: task-tracker; Owner: adminz9bkxe1
+--
+
+ALTER TABLE ONLY users
+    ADD CONSTRAINT users_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 2059 (class 2620 OID 32979)
+-- Name: categories update_modtime; Type: TRIGGER; Schema: task-tracker; Owner: postgres
+--
+
+CREATE TRIGGER update_modtime BEFORE UPDATE ON categories FOR EACH ROW EXECUTE PROCEDURE update_modified_column();
+
+
+--
+-- TOC entry 2060 (class 2620 OID 32980)
+-- Name: reminders update_modtime; Type: TRIGGER; Schema: task-tracker; Owner: postgres
+--
+
+CREATE TRIGGER update_modtime BEFORE UPDATE ON reminders FOR EACH ROW EXECUTE PROCEDURE update_modified_column();
+
+
+--
+-- TOC entry 2058 (class 2606 OID 32923)
+-- Name: reminders reminders_task-id_fkey; Type: FK CONSTRAINT; Schema: task-tracker; Owner: postgres
+--
+
+ALTER TABLE ONLY reminders
+    ADD CONSTRAINT "reminders_task-id_fkey" FOREIGN KEY ("task-id") REFERENCES tasks(id);
+
+
+--
+-- TOC entry 2057 (class 2606 OID 32907)
+-- Name: tasks tasks_category-id_fkey; Type: FK CONSTRAINT; Schema: task-tracker; Owner: postgres
+--
+
+ALTER TABLE ONLY tasks
+    ADD CONSTRAINT "tasks_category-id_fkey" FOREIGN KEY ("category-id") REFERENCES categories(id);
+
+
+--
+-- TOC entry 2055 (class 2606 OID 32902)
+-- Name: tasks tasks_parent-task-id_fkey; Type: FK CONSTRAINT; Schema: task-tracker; Owner: postgres
+--
+
+ALTER TABLE ONLY tasks
+    ADD CONSTRAINT "tasks_parent-task-id_fkey" FOREIGN KEY ("parent-task-id") REFERENCES tasks(id);
+
+
+--
+-- TOC entry 2056 (class 2606 OID 33004)
+-- Name: tasks tasks_user-id_fkey; Type: FK CONSTRAINT; Schema: task-tracker; Owner: postgres
+--
+
+ALTER TABLE ONLY tasks
+    ADD CONSTRAINT "tasks_user-id_fkey" FOREIGN KEY ("user-id") REFERENCES users(id);
+
+
+-- Completed on 2016-06-29 15:20:51
+
+--
+-- PostgreSQL database dump complete
+--
+

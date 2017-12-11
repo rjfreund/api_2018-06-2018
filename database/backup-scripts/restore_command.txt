@@ -1,0 +1,1 @@
+psql -U adminz9bkxe1 api < (datetime)_task-tracker_schema.sql

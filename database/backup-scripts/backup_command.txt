@@ -1,0 +1,1 @@
+pg_dump --username=postgres --schema-only --schema=task-tracker --file=(datetime)_task-tracker_schema.sql api
