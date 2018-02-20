@@ -5,12 +5,12 @@ var tableHelper = require('./tableHelper');
 var hashids = new (require('hashids'))(require('../../projectUtils/hashids/salt'));
 var getJsonFromString = require('../../projectUtils/getJsonFromString/getJsonFromString');
 
-function autoJoin(schemaName, tableName, filter, whereOp, orderBy, isNested, user){
-    return autoJoinRec(schemaName, tableName, filter, whereOp, orderBy, isNested, user, [])
+function autoJoin(opts){
+    return autoJoinRec(opts.schemaName, opts.tableName, opts.filter, opts.whereOp, opts.orderBy, opts.shouldAutoJoin, user, [])
 }
 
-function autoJoinRec(schemaName, tableName, filter, whereOp, orderBy, isNested, user, prevJoinedTables){
-    if (isNested !== false){ isNested = true; }
+function autoJoinRec(schemaName, tableName, filter, whereOp, orderBy, shouldAutoJoin, user, prevJoinedTables){
+    if (shouldAutoJoin !== false){ shouldAutoJoin = true; }
     return async(function(){
         var rows = await(db.select()
         .withSchema(schemaName)
@@ -61,13 +61,13 @@ function autoJoinRec(schemaName, tableName, filter, whereOp, orderBy, isNested, 
         for (var i = 0; i < rows.length; i++) {
             row = rows[i];
             row = await(tableHelper.encodeKeyValues(schemaName, tableName, row));
-            if (!isNested){ continue; }   
+            if (!shouldAutoJoin){ continue; }   
             for (var j = 0; j < getReferencedByTables.length; j++) {
                 rel = getReferencedByTables[j];
                 childFilter[rel.foreign_column] = row[rowPrimaryKeyColumn];
                 if (prevJoinedTables.includes(tableName)){ continue; }
                 prevJoinedTables.push(tableName);
-                row[rel.foreign_table] = await(autoJoinRec(schemaName, rel.foreign_table, childFilter, null, null, isNested, user, prevJoinedTables));
+                row[rel.foreign_table] = await(autoJoinRec(schemaName, rel.foreign_table, childFilter, null, null, shouldAutoJoin, user, prevJoinedTables));
             }
         }
         return rows;

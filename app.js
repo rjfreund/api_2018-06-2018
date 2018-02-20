@@ -10,8 +10,7 @@ var passport = require('passport');
 var JwtStrategy = require('passport-jwt').Strategy;
 var ExtractJwt = require('passport-jwt').ExtractJwt;
 
-var routes = require('./routes/index');
-//var openshift = require('./routes/openshift');
+var routes = require('./apps/index');
 
 var app = express();
 
@@ -29,7 +28,6 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', routes);
-//app.use('/', openshift); //my local machine doesn't like ECMAScript 6 with backticks (`) for string literals :(
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

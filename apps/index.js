@@ -41,6 +41,8 @@ router.get('/:schemaName/:tableName/describe', function(req, res, next){
 
 router.use('/task-tracker', function(req, res, next){ req.schemaName = "task-tracker"; next(); }, require('./task-tracker'));
 
+router.use('/unite', function(req, res, next){ req.schemaName = 'unite'; next(); }, require('./unite'));
+
 router.get('/', function getSchemas(req, res, next) {
     var schemas = [];
 	db.select()
